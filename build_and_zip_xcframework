@@ -1,0 +1,37 @@
+
+rm -rf build
+
+ xcodebuild archive \
+    -project RemoteTestFramework.xcodeproj \
+    -scheme "RemoteTestFramework" \
+    -sdk "iphoneos" \
+    -arch arm64 \
+    -archivePath "build/RemoteTestFramework_ios.xcarchive" \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
+
+ xcodebuild archive \
+    -project RemoteTestFramework.xcodeproj \
+    -scheme "RemoteTestFramework" \
+    -sdk "iphonesimulator" \
+    -arch x86_64 \
+    -archivePath "build/RemoteTestFramework_simulator.xcarchive" \
+    SKIP_INSTALL=NO \
+    BUILD_LIBRARIES_FOR_DISTRIBUTION=YES \
+
+    xcodebuild -create-xcframework \
+    -framework "build/RemoteTestFramework_ios.xcarchive/Products/Library/Frameworks/RemoteTestFramework.framework" \
+    -framework "build/RemoteTestFramework_simulator.xcarchive/Products/Library/Frameworks/RemoteTestFramework.framework" \
+    -output "build/RemoteTestFramework.xcframework"
+
+cd build
+zip -r RemoteTestFramework.xcframework.zip RemoteTestFramework.xcframework
+cd .. 
+echo 'compute-checksum:'
+swift package compute-checksum build/RemoteTestFramework.xcframework.zip
+
+#    xcodebuild -create-xcframework \
+#    -framework "build/RemoteTestFramework_ios.xcarchive/Products/Library/Frameworks/RemoteTestFramework.framework" \
+#    -debug-symbols "build/RemoteTestFramework_ios.xcarchive/dSYMs/${schemes[$n]}.RemoteTestFramework.dSYM" \
+#    -framework "build/RemoteTestFramework_simulator.xcarchive/Products/Library/Frameworks/RemoteTestFramework.framework"
+#    -output build/RemoteTestFramework.xcframework
